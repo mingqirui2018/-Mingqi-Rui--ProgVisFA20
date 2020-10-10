@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>WK4 Assignment</title>
+        <script src= "https://d3js.org/d3.v6.js"></script>
+        <style type="text/css"> 
+        	svg{
+            background-color: mintcream;
+            width:760px;
+            height:500px;
+            margin: 20px;
+          }
+
+          .title {
+            font-size: 20px;
+            font-weight: bold;
+            font-family: sans-serif;
+          }
+
+          .labels{
+            fill: black;
+            font-size: 16px;
+            font-family: sans-serif;
+          }
+
+            
+        
+        </style>
+    </head>
+
+
+    <body>
+         <svg></svg> <!--Remember to add the svg here like this if you are applying it above-->
+
+        <script type="text/javascript">
+
+      const dataset = d3.csv("greenland.csv").then (dataset =>{
+      console.log(dataset);
+        
+        //Create data
+        //const dataset = [{"city": "Shanghai", "area": "8.2"}, 
+                          // {"city": "Beijing", "area": "16.2"}, 
+                          // {"city": "Shenzhen", "area": "16"}, 
+                          // {"city": "Hangzhou", "area": "13.8"},
+                          // {"city": "Nanjing", "area": "15.6"},
+                          // {"city": "Ningbo", "area": "11.5"},
+                          // {"city": "Xiamen", "area": "14.1"},
+                          // {"city": "Wuxi", "area": "14.9"},
+                          // {"city": "Foshan", "area": "16.6"},
+                          // {"city": "Zhoushan", "area": "16.5"}];
+
+
+        //Color using linear scale, d3 min and max 
+        const maxData = d3.max(dataset, d=>+d.area);
+        const minData = d3.min(dataset, d=>+d.area);
+        const myColor = d3.scaleLinear()
+                          .domain([minData, maxData])
+                          .range(["white", "#004433"]);//lightest and darkest green from ColorBrewer "Greens" 
+    
+ 
+        //Drawn with d3.line()                 
+        const greenlandGenerator = d3.line();
+        
+
+        //To draw the lines we are using an array to capture the path points. D3 uses the [x,y] of the array as x y for the path. 
+        //The original path points for our mountain drawing: "M60, 10 L95,95 L5,95 L30,50 L35,60 L44,35 L50,50 L60,10"
+        const gl_points = [
+        [50,10],//This is the M point. The rest are Ls. 
+        [68,24],
+        [54,24],
+        [74,36],
+        [54,36],
+        [84,50],
+        [54,50],
+        [90,62],
+        [54,62],
+        [54,80],
+        [46,80],
+        [46,62],
+        [14,62],
+        [46,50],
+        [20,50],
+        [46,36],
+        [26,36],
+        [46,24],
+        [30,24],
+        [50,10]
+        ];
+
+        const pathString = greenlandGenerator(gl_points);
+        const row = 5; //in class we changed this to 3 to see what happens
+        const size = 100;
+        const sizeY =160;//we added this for when changed row to 3
+
+        const svg = d3.select("svg");
+
+
+        //making groups
+        const g = svg.selectAll("g")
+                      .data(dataset, d=>d)
+                      .enter()
+                      .append("g")
+                      .attr("transform", (d,i)=>{
+                        const x = (i % row +1) * size;
+                        const y = (Math.floor(i/row)+.60) * sizeY;
+                        return 'translate(' + [x,y] + ')';})
+                      .attr("fill", d=> myColor(+d.area.replace(',', '')))
+                      .attr("stroke", "#274d3d")
+                      .attr("stroke-width", "1px");
+
+
+        g.append("path")
+         .attr("d", pathString);
+
+        //Make Labels
+        g.append("text")
+          .attr("x", size/2) //x coordinate
+          .attr("y", size + 8) //y coordinate
+          .attr("text-anchor", "middle") //horizontal text alignment 
+          .attr("dy", "1px") //y coordinate offset
+          .attr("class","labels")
+          .text(d=>d.city); //the text 
+
+        //Note the difference between svg.append text and g.append in this example. 
+        svg.append("text")
+           .attr("x", 360) //x coordinate
+           .attr("y", 60) //y coordinate
+           .attr("text-anchor", "middle") //horizontal text alignment
+           .attr("fill", "#274d3d")
+           .attr("class", "title")
+           .text("Top 10 GDP Cities in China Colored by per capita Park Green Area"); //the text 
+
+        </script>
+    </body>
+</html>
